@@ -3,17 +3,19 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
+import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { Navbar } from "../custom-components/Navbar"; // <-- IMPORT THE NAVBAR
+import { Navbar } from "../custom-components/Navbar";
 
-
+// --- PASTE YOUR API KEYS HERE ---
 const TMDB_API_KEY = "f54fa4d4f3194b07532fed063bbb1ed5";
 const GNEWS_API_KEY = "2292fff9f892cde36a495c00d220783a";
 const EXCHANGERATE_API_KEY = "c968e6a4f756ec94d027e83e";
-
+// ---------------------------------
 
 export function CountryDetail() {
+  // ... (keep all your existing useState and useEffect hooks exactly as they are) ...
   const { countryCode } = useParams();
   const [country, setCountry] = useState(null);
   const [movies, setMovies] = useState([]);
@@ -23,6 +25,7 @@ export function CountryDetail() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // ... (Your entire useEffect fetching logic remains unchanged) ...
     setLoading(true);
     setCountry(null);
     setMovies([]);
@@ -59,9 +62,10 @@ export function CountryDetail() {
       .finally(() => {
         setLoading(false);
       });
-
   }, [countryCode]);
 
+
+  // ... (keep your loading and error return statements as they are) ...
   if (loading && !country) {
     return (
       <>
@@ -72,7 +76,7 @@ export function CountryDetail() {
       </>
     );
   }
-
+  
   if (error) {
     return (
       <>
@@ -82,69 +86,79 @@ export function CountryDetail() {
     );
   }
 
-  if (!country) return <Navbar />; // Render navbar even if no country data
 
   return (
     <>
       <Navbar />
-      <main className="container mx-auto p-8">
-        <Button asChild variant="outline" className="mb-8">
-          <Link to="/">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to all countries
-          </Link>
-        </Button>
+      <motion.main 
+        className="container mx-auto p-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* ... (The entire content of your existing <main> tag goes here) ... */}
+        {country && (
+          <>
+            <Button asChild variant="outline" className="mb-8">
+              <Link to="/">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back to all countries
+              </Link>
+            </Button>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div>
-            <img src={country.flags.svg} alt={`Flag of ${country.name.common}`} className="w-full border rounded-lg shadow-lg" />
-          </div>
-          <div>
-            <h2 className="text-4xl font-bold mb-6">{country.name.common}</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4 mb-8 text-lg">
-              <p><span className="font-semibold">Official Name:</span> {country.name.official}</p>
-              <p><span className="font-semibold">Population:</span> {country.population.toLocaleString()}</p>
-              <p><span className="font-semibold">Region:</span> {country.region}</p>
-              <p><span className="font-semibold">Sub Region:</span> {country.subregion}</p>
-              <p><span className="font-semibold">Capital:</span> {country.capital?.join(', ') || 'N/A'}</p>
-              <p><span className="font-semibold">Currencies:</span> {Object.values(country.currencies).map(c => c.name).join(', ')}</p>
-              <p><span className="font-semibold">Languages:</span> {Object.values(country.languages).join(', ')}</p>
-              {exchangeRate && <p><span className="font-semibold">Exchange Rate:</span> 1 {exchangeRate.base_code} = {exchangeRate.conversion_rates.USD} USD</p>}
-            </div>
-            {country.borders?.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div>
-                <h3 className="font-semibold text-xl mb-2">Border Countries:</h3>
-                <div className="flex flex-wrap gap-2">{country.borders.map(b => <Button asChild key={b} variant="secondary"><Link to={`/country/${b}`}>{b}</Link></Button>)}</div>
+                <img src={country.flags.svg} alt={`Flag of ${country.name.common}`} className="w-full border rounded-lg shadow-lg" />
+              </div>
+              <div>
+                <h2 className="text-4xl font-bold mb-6">{country.name.common}</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4 mb-8 text-lg">
+                  <p><span className="font-semibold">Official Name:</span> {country.name.official}</p>
+                  <p><span className="font-semibold">Population:</span> {country.population.toLocaleString()}</p>
+                  <p><span className="font-semibold">Region:</span> {country.region}</p>
+                  <p><span className="font-semibold">Sub Region:</span> {country.subregion}</p>
+                  <p><span className="font-semibold">Capital:</span> {country.capital?.join(', ') || 'N/A'}</p>
+                  <p><span className="font-semibold">Currencies:</span> {Object.values(country.currencies).map(c => c.name).join(', ')}</p>
+                  <p><span className="font-semibold">Languages:</span> {Object.values(country.languages).join(', ')}</p>
+                  {exchangeRate && <p><span className="font-semibold">Exchange Rate:</span> 1 {exchangeRate.base_code} = {exchangeRate.conversion_rates.USD} USD</p>}
+                </div>
+                {country.borders?.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-xl mb-2">Border Countries:</h3>
+                    <div className="flex flex-wrap gap-2">{country.borders.map(b => <Button asChild key={b} variant="secondary"><Link to={`/country/${b}`}>{b}</Link></Button>)}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {news.length > 0 && (
+              <div className="mt-16">
+                <h3 className="text-3xl font-bold mb-6">Latest News</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {news.map(article => (
+                    <a href={article.url} target="_blank" rel="noopener noreferrer" key={article.title} className="block border rounded-lg p-4 hover:bg-muted transition-colors">
+                      <img src={article.image} alt={article.title} className="rounded mb-4 aspect-video object-cover"/>
+                      <h4 className="font-semibold mb-2">{article.title}</h4>
+                      <p className="text-sm text-muted-foreground">{article.source.name}</p>
+                    </a>
+                  ))}
+                </div>
               </div>
             )}
-          </div>
-        </div>
-        
-        {news.length > 0 && (
-          <div className="mt-16">
-            <h3 className="text-3xl font-bold mb-6">Latest News</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {news.map(article => (
-                <a href={article.url} target="_blank" rel="noopener noreferrer" key={article.title} className="block border rounded-lg p-4 hover:bg-muted transition-colors">
-                  <img src={article.image} alt={article.title} className="rounded mb-4 aspect-video object-cover"/>
-                  <h4 className="font-semibold mb-2">{article.title}</h4>
-                  <p className="text-sm text-muted-foreground">{article.source.name}</p>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {movies.length > 0 && (
-          <div className="mt-16">
-            <h3 className="text-3xl font-bold mb-6">Popular Movies</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-              {movies.map(movie => movie.poster_path && (
-                <div key={movie.id}><img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} className="rounded-lg shadow-md" /><p className="text-sm mt-2 font-semibold truncate">{movie.title}</p></div>
-              ))}
-            </div>
-          </div>
+            {movies.length > 0 && (
+              <div className="mt-16">
+                <h3 className="text-3xl font-bold mb-6">Popular Movies</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                  {movies.map(movie => movie.poster_path && (
+                    <div key={movie.id}><img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} className="rounded-lg shadow-md" /><p className="text-sm mt-2 font-semibold truncate">{movie.title}</p></div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
-      </main>
+      </motion.main>
     </>
   );
 }
