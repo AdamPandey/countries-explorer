@@ -2,26 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { motion } from 'framer-motion';
-import { CountryCard } from "./custom-components/CountryCard";
 import { Navbar } from './custom-components/Navbar';
 import { CountryCardSkeleton } from './custom-components/CountryCardSkeleton';
-import { HeroTicker } from './custom-components/HeroTicker'; // <-- IMPORT THE NEW COMPONENT
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.08,
-    }
-  }
-};
+import { HeroTicker } from './custom-components/HeroTicker';
+import { CountryGrid } from './custom-components/CountryGrid';
+import { Globe } from './custom-components/globe/Globe';
+import { useMediaQuery } from './hooks/useMediaQuery';
 
 function App() {
   const [countries, setCountries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   useEffect(() => {
     const fields = 'name,capital,population,flags,region,cca3';
@@ -51,21 +44,20 @@ function App() {
         onSearchChange={setSearchTerm}
       />
       
-      {!loading && <HeroTicker countries={countries} />}
+      {!loading && (isDesktop ? <Globe /> : <HeroTicker countries={countries} />)}
 
-      <motion.main 
-        className="container mx-auto p-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
+      <main className="container mx-auto p-8">
         <div className="my-8 text-center">
-            <h2 className="text-3xl font-bold tracking-tight">Explore Countries</h2>
-            <p className="text-muted-foreground">Or search for a specific one above</p>
+            <h2 className="text-3xl font-bold tracking-tight">
+              {isDesktop ? "Or Browse Below" : "Explore Countries"}
+            </h2>
+            <p className="text-muted-foreground">
+              {isDesktop ? "Click on a country on the globe or find it in the list" : "Or search for a specific one above"}
+            </p>
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm-grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {Array.from({ length: 12 }).map((_, index) => (
               <CountryCardSkeleton key={index} />
             ))}
@@ -73,13 +65,9 @@ function App() {
         ) : error ? (
           <div>{error}</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredCountries.map(country => (
-              <CountryCard key={country.cca3} country={country} />
-            ))}
-          </div>
+          <CountryGrid countries={filteredCountries} />
         )}
-      </motion.main>
+      </main>
     </>
   );
 }
