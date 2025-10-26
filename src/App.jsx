@@ -44,7 +44,7 @@ function App() {
         onSearchChange={setSearchTerm}
       />
       
-      {!loading && (isDesktop ? <Globe /> : <HeroTicker countries={countries} />)}
+      {!loading && (isDesktop ? <Globe countries={countries} /> : <HeroTicker countries={countries} />)}
 
       <main className="container mx-auto p-8">
         <div className="my-8 text-center">
