@@ -12,31 +12,56 @@ import { InfoCard } from './InfoCard';
 import { AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
 
-// This Scene component is clean and correct.
-function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, theme, isAnyCountryHovered }) {
+function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, theme, isAnyCountryHovered, selectedCountry }) {
   const groupRef = useRef();
   const [isUserInteracting, setIsUserInteracting] = useState(false);
   const timeoutRef = useRef(null);
 
-  useFrame((state, delta) => {
-    // Animate camera
-    if (controlsRef.current) {
-      const controls = controlsRef.current;
-      const targetPosition = target ? target.center : new THREE.Vector3(0, 0, 0);
-      const idealPosition = target ? target.center.clone().normalize().multiplyScalar(1.8) : new THREE.Vector3(0, 0, 2.5);
-      const distanceToTarget = state.camera.position.distanceTo(idealPosition);
+  useEffect(() => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = -1.57; // Start focused on the Americas
+    }
+  }, []);
 
-      if (distanceToTarget < 0.01) {
-        state.camera.position.copy(idealPosition);
-        controls.target.copy(targetPosition);
-      } else {
-        controls.target.lerp(targetPosition, 0.1);
-        state.camera.position.lerp(idealPosition, 0.1);
-      }
-      controls.update();
+  useFrame((state, delta) => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+
+    // =================================================================
+    // THE DEFINITIVE CAMERA FIX
+    // =================================================================
+    let worldTargetPosition;
+    let worldIdealPosition;
+
+    if (target) {
+      // 1. Get the local center of the clicked country from the `target` prop.
+      const localCenter = target.center;
+      
+      // 2. Convert this local point to its actual position in the global 3D space.
+      // This is crucial because it accounts for the globe's current rotation.
+      worldTargetPosition = groupRef.current.localToWorld(localCenter.clone());
+
+      // 3. Calculate the camera's ideal position based on this correct WORLD target.
+      worldIdealPosition = worldTargetPosition.clone().normalize().multiplyScalar(1.8);
+    } else {
+      // If no target, aim for the center of the world and the default camera position.
+      worldTargetPosition = new THREE.Vector3(0, 0, 0);
+      worldIdealPosition = new THREE.Vector3(0, 0, 2.5);
     }
     
-    // Animate rotation
+    // Animate camera and controls towards the calculated world positions
+    const distanceToTarget = state.camera.position.distanceTo(worldIdealPosition);
+    if (distanceToTarget < 0.01) {
+      state.camera.position.copy(worldIdealPosition);
+      controls.target.copy(worldTargetPosition);
+    } else {
+      controls.target.lerp(worldTargetPosition, 0.1);
+      state.camera.position.lerp(worldIdealPosition, 0.1);
+    }
+
+    controls.update();
+    
+    // Auto-rotation logic
     if (groupRef.current && !isUserInteracting && !target) {
       groupRef.current.rotation.y += delta * 0.1;
     }
@@ -61,15 +86,19 @@ function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, th
         <sphereGeometry args={[1, 64, 64]} />
         <meshBasicMaterial color={theme === 'dark' ? '#111827' : '#ffffff'} />
       </mesh>
-      {geoData.map((geo) => (
-        <Country
-          key={geo.id || geo.properties.name}
-          geo={geo}
-          onHoverChange={onHoverChange}
-          onCountryClick={onCountryClick}
-          theme={theme}
-        />
-      ))}
+      {geoData.map((geo) => {
+        const isActive = selectedCountry?.name.common === geo.properties.name || selectedCountry?.name.official === geo.properties.name;
+        return (
+          <Country
+            key={geo.id || geo.properties.name}
+            geo={geo}
+            onHoverChange={onHoverChange}
+            onCountryClick={onCountryClick}
+            theme={theme}
+            isActive={isActive}
+          />
+        );
+      })}
       <OrbitControls
         ref={controlsRef}
         enableZoom={true}
@@ -85,6 +114,7 @@ function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, th
   );
 }
 
+// The Globe component below does not need any changes.
 export function Globe({ countries }) {
   const [geoData, setGeoData] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(null);
@@ -103,7 +133,10 @@ export function Globe({ countries }) {
     const countryData = countries.find(c => 
       c.name.official === countryName || c.name.common === countryName
     );
-    if (countryData && selectedCountry?.cca3 !== countryData.cca3) {
+    if (selectedCountry?.cca3 === countryData?.cca3) {
+      setSelectedCountry(null);
+      setTarget(null);
+    } else if (countryData) {
       setSelectedCountry(countryData);
       setTarget({ center });
     }
@@ -133,11 +166,11 @@ export function Globe({ countries }) {
             controlsRef={controlsRef}
             theme={theme}
             isAnyCountryHovered={isAnyCountryHovered}
+            selectedCountry={selectedCountry}
           />
         </Suspense>
       </Canvas>
 
-      {/* The InfoCard is correctly placed here, outside the Canvas */}
       <AnimatePresence>
         {selectedCountry && (
           <InfoCard

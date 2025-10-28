@@ -13,7 +13,7 @@ export function InfoCard({ country, onNavigate, onClose, theme }) {
   // Theme-aware styling
   const isDarkMode = theme === 'dark';
   const cardStyles = {
-    width: '280px',
+    width: '300px',
     padding: '16px',
     backgroundColor: isDarkMode ? 'rgba(24, 24, 27, 0.9)' : 'rgba(255, 255, 255, 0.9)',
     borderRadius: '12px',
