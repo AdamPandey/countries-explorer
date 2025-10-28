@@ -1,117 +1,98 @@
 // src/custom-components/globe/InfoCard.jsx
 
-import { Html, Billboard } from '@react-three/drei';
-import { useSpring, a } from '@react-spring/three';
-import { useState } from 'react';
+import { motion } from 'framer-motion';
 
-// This is a special animated version of the Html component
-const AnimatedHtml = a(Html);
+// Animation variants for the card to slide in from the right
+const cardVariants = {
+  hidden: { opacity: 0, x: '100%' },
+  visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 30 } },
+  exit: { opacity: 0, x: '100%', transition: { duration: 0.2 } },
+};
 
-export function InfoCard({ country, onNavigate, onClose }) {
-  const [visible, setVisible] = useState(true);
-
-  const handleClose = (e) => {
-    e.stopPropagation();
-    setVisible(false);
-    setTimeout(() => onClose?.(), 300); // Wait for animation
+export function InfoCard({ country, onNavigate, onClose, theme }) {
+  // Theme-aware styling
+  const isDarkMode = theme === 'dark';
+  const cardStyles = {
+    width: '280px',
+    padding: '16px',
+    backgroundColor: isDarkMode ? 'rgba(24, 24, 27, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+    borderRadius: '12px',
+    color: isDarkMode ? 'white' : '#18181b',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+    border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
+    backdropFilter: 'blur(8px)',
+    WebkitBackdropFilter: 'blur(8px)',
   };
-
-  const { scale, opacity } = useSpring({
-    to: {
-      scale: visible ? 1 : 0,
-      opacity: visible ? 1 : 0,
-    },
-    from: { scale: 0, opacity: 0 },
-    config: { mass: 1, tension: 280, friction: 25 },
-  });
-
-  const stopPropagation = (e) => e.stopPropagation();
+  const secondaryTextStyle = { color: isDarkMode ? '#a1a1aa' : '#71717a' };
 
   return (
-    // =================================================================
-    // THE FIX: Changed the X position from 1.7 to 1.5 to move it closer.
-    // =================================================================
-    <Billboard position={[1.2, 0.5, 0]}>
-      <AnimatedHtml
-        center
-        style={{
-          opacity: opacity,
-          transform: scale.to(s => `scale(${s})`),
-          pointerEvents: 'auto',
-        }}
-        onPointerDown={stopPropagation}
-      >
-        <div
+    // This is a normal motion.div positioned absolutely within its parent
+    <motion.div
+      className="absolute top-4 right-4 z-10"
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+    >
+      <div style={cardStyles}>
+        {/* Close Button */}
+        <button
+          onClick={onClose}
           style={{
-            width: '280px',
-            padding: '16px',
-            backgroundColor: 'rgba(24, 24, 27, 0.9)',
-            borderRadius: '12px',
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            width: '24px',
+            height: '24px',
+            border: 'none',
+            borderRadius: '50%',
+            backgroundColor: isDarkMode ? '#b91c1c' : '#ef4444',
             color: 'white',
-            fontFamily: 'sans-serif',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            cursor: 'pointer',
+            fontSize: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            lineHeight: '1',
           }}
         >
-          {/* Close Button */}
-          <button
-            onClick={handleClose}
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              width: '24px',
-              height: '24px',
-              border: 'none',
-              borderRadius: '50%',
-              backgroundColor: '#b91c1c',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              lineHeight: '1',
-            }}
-          >
-            ×
-          </button>
+          ×
+        </button>
 
-          {/* Title */}
-          <h2 style={{ margin: '0 0 12px 0', fontSize: '24px', textAlign: 'center' }}>
-            {country.name.common}
-          </h2>
+        {/* Title */}
+        <h2 style={{ margin: '0 0 12px 0', fontSize: '24px', textAlign: 'center' }}>
+          {country.name.common}
+        </h2>
 
-          {/* Flag */}
-          <img
-            src={country.flags.svg}
-            alt={`Flag of ${country.name.common}`}
-            style={{ width: '100%', borderRadius: '4px', marginBottom: '12px' }}
-          />
+        {/* Flag */}
+        <img
+          src={country.flags.svg}
+          alt={`Flag of ${country.name.common}`}
+          style={{ width: '100%', borderRadius: '4px', marginBottom: '12px' }}
+        />
 
-          {/* Info */}
-          <p style={{ margin: '0 0 16px 0', fontSize: '14px', textAlign: 'center', color: '#a1a1aa' }}>
-            {`Capital: ${country.capital?.[0] || 'N/A'} | Population: ${country.population.toLocaleString()}`}
-          </p>
+        {/* Info */}
+        <p style={{ margin: '0 0 16px 0', fontSize: '14px', textAlign: 'center', ...secondaryTextStyle }}>
+          {`Capital: ${country.capital?.[0] || 'N/A'} | Population: ${country.population.toLocaleString()}`}
+        </p>
 
-          {/* Details Button */}
-          <button
-            onClick={onNavigate}
-            style={{
-              width: '100%',
-              padding: '10px',
-              border: 'none',
-              borderRadius: '8px',
-              backgroundColor: '#0ea5e9',
-              color: 'white',
-              fontSize: '16px',
-              cursor: 'pointer',
-            }}
-          >
-            Show Details
-          </button>
-        </div>
-      </AnimatedHtml>
-    </Billboard>
+        {/* Details Button */}
+        <button
+          onClick={onNavigate}
+          style={{
+            width: '100%',
+            padding: '10px',
+            border: 'none',
+            borderRadius: '8px',
+            backgroundColor: isDarkMode ? '#0ea5e9' : '#0284c7',
+            color: 'white',
+            fontSize: '16px',
+            cursor: 'pointer',
+          }}
+        >
+          Show Details
+        </button>
+      </div>
+    </motion.div>
   );
 }

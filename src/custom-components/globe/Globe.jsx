@@ -9,29 +9,52 @@ import { Country } from './Country';
 import { useTheme } from '@/components/theme-provider';
 import { useNavigate } from 'react-router-dom';
 import { InfoCard } from './InfoCard';
+import { AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
 
-// The Scene component does not need any changes.
+// This Scene component is clean and correct.
 function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, theme, isAnyCountryHovered }) {
-  const initialTarget = useRef(new THREE.Vector3(0, 0, 0));
-  useFrame(({ camera }) => {
+  const groupRef = useRef();
+  const [isUserInteracting, setIsUserInteracting] = useState(false);
+  const timeoutRef = useRef(null);
+
+  useFrame((state, delta) => {
+    // Animate camera
     if (controlsRef.current) {
       const controls = controlsRef.current;
-      const targetPosition = target ? target.center : initialTarget.current;
+      const targetPosition = target ? target.center : new THREE.Vector3(0, 0, 0);
       const idealPosition = target ? target.center.clone().normalize().multiplyScalar(1.8) : new THREE.Vector3(0, 0, 2.5);
-      const distanceToTarget = camera.position.distanceTo(idealPosition);
+      const distanceToTarget = state.camera.position.distanceTo(idealPosition);
+
       if (distanceToTarget < 0.01) {
-        camera.position.copy(idealPosition);
+        state.camera.position.copy(idealPosition);
         controls.target.copy(targetPosition);
       } else {
         controls.target.lerp(targetPosition, 0.1);
-        camera.position.lerp(idealPosition, 0.1);
+        state.camera.position.lerp(idealPosition, 0.1);
       }
       controls.update();
     }
+    
+    // Animate rotation
+    if (groupRef.current && !isUserInteracting && !target) {
+      groupRef.current.rotation.y += delta * 0.1;
+    }
   });
+
+  const onInteractionStart = () => {
+    clearTimeout(timeoutRef.current);
+    setIsUserInteracting(true);
+  };
+
+  const onInteractionEnd = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsUserInteracting(false);
+    }, 3000);
+  };
+
   return (
-    <>
+    <group ref={groupRef}>
       <ambientLight intensity={0.5} />
       <directionalLight position={[1, 1, 1]} intensity={1} />
       <mesh>
@@ -55,8 +78,10 @@ function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, th
         maxDistance={5}
         rotateSpeed={0.4}
         enableRotate={!isAnyCountryHovered && !target}
+        onStart={onInteractionStart}
+        onEnd={onInteractionEnd}
       />
-    </>
+    </group>
   );
 }
 
@@ -97,8 +122,7 @@ export function Globe({ countries }) {
   };
 
   return (
-    // This `relative` class is ESSENTIAL.
-    <div className="relative h-[60vh] w-full cursor-grab active:cursor-grabbing">
+    <div className="relative h-[85vh] w-full cursor-grab active:cursor-grabbing">
       <Canvas camera={{ position: [0, 0, 2.5], fov: 50 }}>
         <Suspense fallback={null}>
           <Scene 
@@ -110,17 +134,21 @@ export function Globe({ countries }) {
             theme={theme}
             isAnyCountryHovered={isAnyCountryHovered}
           />
-          
-          {selectedCountry && (
-            <InfoCard
-              key={selectedCountry.cca3}
-              country={selectedCountry}
-              onClose={handleCloseInfoCard}
-              onNavigate={handleNavigateToDetails}
-            />
-          )}
         </Suspense>
       </Canvas>
+
+      {/* The InfoCard is correctly placed here, outside the Canvas */}
+      <AnimatePresence>
+        {selectedCountry && (
+          <InfoCard
+            key={selectedCountry.cca3}
+            country={selectedCountry}
+            onClose={handleCloseInfoCard}
+            onNavigate={handleNavigateToDetails}
+            theme={theme}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

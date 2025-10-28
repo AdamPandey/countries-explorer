@@ -50,7 +50,7 @@ export function Country({ geo, onHoverChange, onCountryClick, theme }) {
   
   const geometry = useMemo(() => {
     if (!geo?.geometry) return null;
-    return createTriangulatedGeometry(geo, 1.01); 
+    return createTriangulatedGeometry(geo, 1.035); 
   }, [geo]);
 
   const handlePointerEnter = useCallback((e) => {
