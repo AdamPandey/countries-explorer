@@ -8,20 +8,18 @@ import worldAtlas from 'world-atlas/countries-110m.json';
 import { Country } from './Country';
 import { useTheme } from '@/components/theme-provider';
 import { useNavigate } from 'react-router-dom';
-import { InfoCard3D } from './InfoCard3D';
+import { InfoCard } from './InfoCard';
 import * as THREE from 'three';
 
-function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, theme, isAnyCountryHovered, selectedCountry, onClose, onNavigate }) {
+// The Scene component does not need any changes.
+function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, theme, isAnyCountryHovered }) {
   const initialTarget = useRef(new THREE.Vector3(0, 0, 0));
-
   useFrame(({ camera }) => {
     if (controlsRef.current) {
       const controls = controlsRef.current;
       const targetPosition = target ? target.center : initialTarget.current;
       const idealPosition = target ? target.center.clone().normalize().multiplyScalar(1.8) : new THREE.Vector3(0, 0, 2.5);
-
       const distanceToTarget = camera.position.distanceTo(idealPosition);
-
       if (distanceToTarget < 0.01) {
         camera.position.copy(idealPosition);
         controls.target.copy(targetPosition);
@@ -29,18 +27,16 @@ function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, th
         controls.target.lerp(targetPosition, 0.1);
         camera.position.lerp(idealPosition, 0.1);
       }
-      
       controls.update();
     }
   });
-
   return (
     <>
       <ambientLight intensity={0.5} />
       <directionalLight position={[1, 1, 1]} intensity={1} />
       <mesh>
         <sphereGeometry args={[1, 64, 64]} />
-        <meshStandardMaterial color={theme === 'dark' ? '#111827' : '#ffffff'} />
+        <meshBasicMaterial color={theme === 'dark' ? '#111827' : '#ffffff'} />
       </mesh>
       {geoData.map((geo) => (
         <Country
@@ -51,16 +47,6 @@ function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, th
           theme={theme}
         />
       ))}
-
-      {/* InfoCard3D is now INSIDE Scene */}
-      {selectedCountry && (
-        <InfoCard3D
-          country={selectedCountry}
-          onClose={onClose}
-          onNavigate={onNavigate}
-        />
-      )}
-
       <OrbitControls
         ref={controlsRef}
         enableZoom={true}
@@ -92,11 +78,11 @@ export function Globe({ countries }) {
     const countryData = countries.find(c => 
       c.name.official === countryName || c.name.common === countryName
     );
-    if (countryData) {
+    if (countryData && selectedCountry?.cca3 !== countryData.cca3) {
       setSelectedCountry(countryData);
       setTarget({ center });
     }
-  }, [countries]);
+  }, [countries, selectedCountry]);
 
   const handleCloseInfoCard = () => {
     setSelectedCountry(null);
@@ -105,13 +91,14 @@ export function Globe({ countries }) {
 
   const handleNavigateToDetails = () => {
     if (selectedCountry) {
-      navigate(`/country/${selectedCountry.cca3}`);
+      navigate(`/country/${selectedCountry?.cca3}`);
       handleCloseInfoCard();
     }
   };
 
   return (
-    <div className="h-[60vh] w-full cursor-grab active:cursor-grabbing">
+    // This `relative` class is ESSENTIAL.
+    <div className="relative h-[60vh] w-full cursor-grab active:cursor-grabbing">
       <Canvas camera={{ position: [0, 0, 2.5], fov: 50 }}>
         <Suspense fallback={null}>
           <Scene 
@@ -122,10 +109,16 @@ export function Globe({ countries }) {
             controlsRef={controlsRef}
             theme={theme}
             isAnyCountryHovered={isAnyCountryHovered}
-            selectedCountry={selectedCountry}
-            onClose={handleCloseInfoCard}
-            onNavigate={handleNavigateToDetails}
           />
+          
+          {selectedCountry && (
+            <InfoCard
+              key={selectedCountry.cca3}
+              country={selectedCountry}
+              onClose={handleCloseInfoCard}
+              onNavigate={handleNavigateToDetails}
+            />
+          )}
         </Suspense>
       </Canvas>
     </div>
