@@ -49,7 +49,7 @@ export function HeroTicker({ countries }) {
   const column5Photos = photos.slice(20, 25);
 
   return (
-    <div className="h-[60vh] w-full overflow-hidden mask-gradient">
+    <div className="h-[90vh] w-full overflow-hidden mask-gradient">
       {/* Update the grid to have 5 columns */}
       <div className="grid grid-cols-5 gap-4 h-full">
         <TickerColumn photos={column1Photos} direction="up" />
