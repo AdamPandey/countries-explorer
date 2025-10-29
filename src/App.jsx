@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion'; // Import AnimatePresence
+import { motion, AnimatePresence } from 'framer-motion';
 import { CountryCard } from "./custom-components/CountryCard";
 import { Navbar } from './custom-components/Navbar';
 import { CountryCardSkeleton } from './custom-components/CountryCardSkeleton';
@@ -26,9 +26,7 @@ function App() {
   const [error, setError] = useState(null);
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
-  // --- THIS IS THE KEY: A simple flag to know if we are searching ---
   const isSearching = searchTerm.length > 0;
-  // -----------------------------------------------------------------
 
   useEffect(() => {
     const fields = 'name,capital,population,flags,region,cca3,cca2';
@@ -37,7 +35,7 @@ function App() {
       .then(response => {
         setCountries(response.data);
       })
-      .catch(error => { /* ... error handling ... */ })
+      .catch(error => { console.error("Error fetching data:", error); setError("Failed to load data."); })
       .finally(() => {
         setLoading(false);
       });
@@ -55,7 +53,6 @@ function App() {
         onSearchChange={setSearchTerm}
       />
       
-      {/* This component will handle the smooth fade-out animation */}
       <AnimatePresence>
         {!isSearching && !loading && (
           <motion.div
@@ -64,7 +61,12 @@ function App() {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.5, ease: 'easeInOut' }}
           >
-            {isDesktop ? <Globe countries={countries} /> : <HeroTicker countries={countries} />}
+            {/* --- THIS IS THE FINAL, CORRECT LOGIC --- */}
+            {/* On desktop, show the Globe. */}
+            {isDesktop && <Globe countries={countries} />}
+            {/* The Ticker is now shown on BOTH desktop and mobile. */}
+            <HeroTicker countries={countries} />
+            {/* -------------------------------------- */}
           </motion.div>
         )}
       </AnimatePresence>
@@ -75,7 +77,6 @@ function App() {
         initial="hidden"
         animate="visible"
       >
-        {/* The "Browse Below" text will now also disappear when searching */}
         {!isSearching && (
           <div className="my-8 text-center">
               <h2 className="text-3xl font-bold tracking-tight">
@@ -96,7 +97,6 @@ function App() {
         ) : error ? (
           <div>{error}</div>
         ) : (
-          // This grid will now appear to take up the full space when searching
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredCountries.map(country => (
               <CountryCard key={country.cca3} country={country} />
