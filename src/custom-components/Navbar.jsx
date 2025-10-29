@@ -8,11 +8,13 @@ import { Link } from "react-router-dom";
 import { Search, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useMediaQuery } from "@/hooks/useMediaQuery"; // Import the hook
 
 export function Navbar({ searchTerm, onSearchChange, showSearch = false }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const inputRef = useRef(null);
+  const isDesktop = useMediaQuery('(min-width: 1000px)'); // Check for desktop screen size
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,6 +30,16 @@ export function Navbar({ searchTerm, onSearchChange, showSearch = false }) {
     }
   }, [isSearchOpen]);
 
+  const sideTitleVariants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
+  };
+
+  const centerTitleVariants = {
+    hidden: { opacity: 0, y: -10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  };
+
   return (
     <header 
       className={cn(
@@ -37,43 +49,48 @@ export function Navbar({ searchTerm, onSearchChange, showSearch = false }) {
     >
       <div className="container flex h-16 items-center justify-between">
         
-        {/* Wrapper for both side and center titles */}
-        <div className="flex-1 flex items-center">
+        {/* --- LEFT SIDE: The Title --- */}
+        <div className="flex items-center">
           <AnimatePresence>
-            {scrolled ? (
-              // SIDE TITLE (Visible when scrolled)
+            {/* On mobile OR when scrolled on desktop, show the simple side title */}
+            {(!isDesktop || scrolled) && (
               <motion.div
                 key="sideTitle"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.3 }}
+                variants={sideTitleVariants}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
               >
                 <Link to="/" className="flex items-center space-x-2">
                   <Globe className="h-6 w-6" />
-                  <span className="font-bold">Country Explorer</span>
-                </Link>
-              </motion.div>
-            ) : (
-              // CENTER TITLE (Visible at top of page)
-              <motion.div
-                key="centerTitle"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="flex-1 flex justify-center absolute left-1/2 -translate-x-1/2"
-              >
-                <Link to="/" className="flex items-center space-x-2">
-                  <Globe className="h-6 w-6" />
-                  <span className="font-bold">Country Explorer</span>
+                  <span className="font-bold sm:inline-block">Country Explorer</span>
                 </Link>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Right Side Icons */}
+        {/* --- CENTER: The Animated Desktop Title --- */}
+        {/* This entire block will ONLY render on desktop when not scrolled */}
+        <AnimatePresence>
+          {isDesktop && !scrolled && (
+            <motion.div
+              key="centerTitle"
+              className="absolute left-1/2 -translate-x-1/2"
+              variants={centerTitleVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+            >
+              <Link to="/" className="flex items-center space-x-2">
+                <Globe className="h-6 w-6" />
+                <span className="font-bold sm:inline-block">Country Explorer</span>
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* --- RIGHT SIDE: Icons --- */}
         <div className="flex items-center space-x-2">
           {showSearch && (
             <div className="flex items-center">
@@ -81,9 +98,9 @@ export function Navbar({ searchTerm, onSearchChange, showSearch = false }) {
                 {isSearchOpen && (
                   <motion.div
                     initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: "10rem", opacity: 1 }}
+                    animate={{ width: isDesktop ? "12rem" : "8rem", opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
                     <Input 
