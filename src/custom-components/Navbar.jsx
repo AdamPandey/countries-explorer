@@ -9,6 +9,7 @@ import { Search, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery"; // Import the hook
+import { Logo } from "./Logo";
 
 export function Navbar({ searchTerm, onSearchChange, showSearch = false }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -62,8 +63,8 @@ export function Navbar({ searchTerm, onSearchChange, showSearch = false }) {
                 exit="hidden"
               >
                 <Link to="/" className="flex items-center space-x-2">
-                  <Globe className="h-6 w-6" />
-                  <span className="font-bold sm:inline-block">Country Explorer</span>
+                  <Logo className="h-6 w-6" />
+                  <span className="font-bold sm:inline-block">Meridian</span>
                 </Link>
               </motion.div>
             )}
@@ -83,8 +84,8 @@ export function Navbar({ searchTerm, onSearchChange, showSearch = false }) {
               exit="hidden"
             >
               <Link to="/" className="flex items-center space-x-2">
-                <Globe className="h-6 w-6" />
-                <span className="font-bold sm:inline-block">Country Explorer</span>
+                <Logo className="h-6 w-6" />
+                <span className="font-bold sm:inline-block">Meridian</span>
               </Link>
             </motion.div>
           )}
