@@ -3,7 +3,7 @@
 ### An Interactive 3D Globe for Exploring World Data
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-View_Here-blue?style=for-the-badge&logo=vercel)]([YOUR_HOSTED_URL_HERE])
-[![GitHub Repo](https://img.shields.io/badge/GitHub-Source_Code-black?style=for-the-badge&logo=github)]([https://github.com/AdamPandey/countries-explorer.git])
+[GitHub Repo]([https://github.com/AdamPandey/countries-explorer.git])
 
 
 
