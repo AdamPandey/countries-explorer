@@ -12,7 +12,7 @@ export async function onRequest(context) {
   // =================================================================
   // The API key is hardcoded directly into the file.
   // =================================================================
-  const PEXELS_API_KEY = "Tcy9zXQsZOm9PmHdoGzuQwE1N7iqhjL6QL1Z0czthoP6Qjg3ERhLBFX2";
+  const PEXELS_API_KEY = "y6mT6HG45N28dTmpoD8ZbSiCEO83L3xkDtTAfYHOT3lFCVyQvhLHU10s";
   // =================================================================
 
   const pexelsUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1`;
