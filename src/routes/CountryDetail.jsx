@@ -8,24 +8,20 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Navbar } from "../custom-components/Navbar";
 
-// --- PASTE YOUR API KEYS HERE ---
+// We only need the TMDB and ExchangeRate keys here now. GNews is handled by the proxy.
 const TMDB_API_KEY = "f54fa4d4f3194b07532fed063bbb1ed5";
-const GNEWS_API_KEY = "2292fff9f892cde36a495c00d220783a";
 const EXCHANGERATE_API_KEY = "c968e6a4f756ec94d027e83e";
-// ---------------------------------
 
 export function CountryDetail() {
-  // ... (keep all your existing useState and useEffect hooks exactly as they are) ...
-  const { countryCode } = useParams();
   const [country, setCountry] = useState(null);
   const [movies, setMovies] = useState([]);
   const [news, setNews] = useState([]);
   const [exchangeRate, setExchangeRate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { countryCode } = useParams();
 
   useEffect(() => {
-    // ... (Your entire useEffect fetching logic remains unchanged) ...
     setLoading(true);
     setCountry(null);
     setMovies([]);
@@ -45,14 +41,25 @@ export function CountryDetail() {
         const fetchMoviesData = axios.get(`https://api.themoviedb.org/3/discover/movie`, {
             params: { api_key: TMDB_API_KEY, with_origin_country: cca2, sort_by: 'popularity.desc' }
         });
-        const fetchNewsData = axios.get(`https://gnews.io/api/v4/search?q=${countryName}&lang=en&max=4&apikey=${GNEWS_API_KEY}`);
+
+        // --- THE FINAL FIX: Call our new GNews proxy function ---
+        const fetchNewsData = axios.get(`/gnews`, {
+            params: { q: countryName, lang: 'en', max: 4 }
+        });
+        // --------------------------------------------------------
+
         const fetchExchangeRateData = axios.get(`https://v6.exchangerate-api.com/v6/${EXCHANGERATE_API_KEY}/latest/${currencyCode}`);
 
         return Promise.allSettled([fetchMoviesData, fetchNewsData, fetchExchangeRateData]);
       })
       .then(results => {
         if (results[0].status === 'fulfilled') setMovies(results[0].value.data.results.slice(0, 8));
-        if (results[1].status === 'fulfilled') setNews(results[1].value.data.articles);
+        
+        // Add a defensive check for the news data, just in case
+        if (results[1].status === 'fulfilled' && results[1].value.data.articles) {
+          setNews(results[1].value.data.articles);
+        }
+
         if (results[2].status === 'fulfilled') setExchangeRate(results[2].value.data);
       })
       .catch(error => {
@@ -62,10 +69,9 @@ export function CountryDetail() {
       .finally(() => {
         setLoading(false);
       });
+
   }, [countryCode]);
 
-
-  // ... (keep your loading and error return statements as they are) ...
   if (loading && !country) {
     return (
       <>
@@ -86,7 +92,6 @@ export function CountryDetail() {
     );
   }
 
-
   return (
     <>
       <Navbar />
@@ -97,7 +102,6 @@ export function CountryDetail() {
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.5 }}
       >
-        {/* ... (The entire content of your existing <main> tag goes here) ... */}
         {country && (
           <>
             <Button asChild variant="outline" className="mb-8">
@@ -131,7 +135,7 @@ export function CountryDetail() {
               </div>
             </div>
             
-            {news.length > 0 && (
+            {news && news.length > 0 && (
               <div className="mt-16">
                 <h3 className="text-3xl font-bold mb-6">Latest News</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -146,7 +150,7 @@ export function CountryDetail() {
               </div>
             )}
 
-            {movies.length > 0 && (
+            {movies && movies.length > 0 && (
               <div className="mt-16">
                 <h3 className="text-3xl font-bold mb-6">Popular Movies</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
