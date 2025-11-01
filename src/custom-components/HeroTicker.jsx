@@ -5,7 +5,7 @@ import axios from "axios"; // <-- IMPORT AXIOS
 import { TickerColumn } from "./TickerColumn";
 
 // We now get the key from Vite's environment variables
-const PEXELS_API_KEY = "Tcy9zXQsZOm9PmHdoGzuQwE1N7iqhjL6QL1Z0czthoP6Qjg3ERhLBFX2";
+// const PEXELS_API_KEY = "Tcy9zXQsZOm9PmHdoGzuQwE1N7iqhjL6QL1Z0czthoP6Qjg3ERhLBFX2";
 
 const shuffleArray = (array) => array.sort(() => 0.5 - Math.random());
 
@@ -13,20 +13,15 @@ export function HeroTicker({ countries }) {
   const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
-    if (countries.length === 0 || !PEXELS_API_KEY) return;
+    if (countries.length === 0) return;
 
     const fetchPhotos = async () => {
       try {
         const randomCountries = shuffleArray([...countries]).slice(0, 25);
         const photoPromises = randomCountries.map(country => {
-          // --- THE FIX: Use Axios to make the API call ---
           const query = `Travel ${country.name.common}`;
-          return axios.get(`https://api.pexels.com/v1/search`, {
-            params: { query, per_page: 1 },
-            headers: {
-              Authorization: PEXELS_API_KEY // Pexels API requires an Authorization header
-            }
-          });
+          // This now points to our own backend, which is safe from CORS.
+          return axios.get(`/pexels?query=${encodeURIComponent(query)}`);
           // ---------------------------------------------
         });
         
