@@ -9,15 +9,13 @@ https://github.com/AdamPandey/countries-explorer.git
 
 ---
 
-## 📖 Project Description
+## Project Description
 
 **Meridian** is a modern, immersive web application that reimagines how we explore data about countries around the world. Built with React and Vite, this project moves beyond traditional lists and grids by presenting a fully interactive 3D globe as its centerpiece. Users can navigate the globe, click on countries to receive detailed information, and experience a rich, multi-API data environment that provides insights into geography, culture, and current events.
 
-This application was developed as a final project for a front-end framework module, with a focus on creating a polished, A+ grade user experience by integrating advanced features, multiple external APIs, and a professional, responsive design.
-
 ---
 
-## ✨ Key Features
+## Key Features
 
 This project incorporates a wide range of modern front-end features:
 
@@ -53,7 +51,7 @@ This project incorporates a wide range of modern front-end features:
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 -   **Frontend:** React, Vite
 -   **3D Graphics:** React Three Fiber, Three.js, React Three Drei
@@ -65,7 +63,7 @@ This project incorporates a wide range of modern front-end features:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 To run this project locally, follow these steps:
 
@@ -80,16 +78,7 @@ To run this project locally, follow these steps:
     npm install
     ```
 
-3.  **Set up environment variables:**
-    Create a file named `.env.local` in the root of the project and add your API keys:
-    ```
-    VITE_TMDB_API_KEY="your_tmdb_api_key"
-    VITE_GNEWS_API_KEY="your_gnews_api_key"
-    VITE_EXCHANGERATE_API_KEY="your_exchangerate_api_key"
-    VITE_PEXELS_API_KEY="your_pexels_api_key"
-    ```
-
-4.  **Run the development server:**
+3.  **Run the development server:**
     ```bash
     npm run dev
     ```
@@ -97,7 +86,7 @@ To run this project locally, follow these steps:
 
 ---
 
-## 💡 Development Highlights & Challenges
+## Development Highlights & Challenges
 
 This project involved overcoming several significant technical challenges, which were crucial to its development:
 

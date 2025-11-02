@@ -1,5 +1,3 @@
-// src/main.jsx
-
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import {
@@ -19,7 +17,7 @@ const router = createBrowserRouter([
     element: <Root />,
     children: [
       {
-        index: true, // This makes App the default child route
+        index: true, 
         element: <App />,
       },
       {

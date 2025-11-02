@@ -1,5 +1,3 @@
-// src/custom-components/TickerColumn.jsx
-
 import { useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 
@@ -10,7 +8,7 @@ export function TickerColumn({ photos, direction = "up" }) {
     const animationProps = {
       y: direction === "up" ? "-50%" : "0%",
       transition: {
-        duration: 30 + Math.random() * 15, // Randomize duration for a more organic feel
+        duration: 30 + Math.random() * 15, 
         ease: "linear",
         repeat: Infinity,
       },

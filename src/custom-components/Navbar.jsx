@@ -1,5 +1,3 @@
-// src/custom-components/Navbar.jsx
-
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Search, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useMediaQuery } from "@/hooks/useMediaQuery"; // Import the hook
+import { useMediaQuery } from "@/hooks/useMediaQuery"; 
 import { Logo } from "./Logo";
 
 export function Navbar({ searchTerm, onSearchChange, showSearch = false }) {

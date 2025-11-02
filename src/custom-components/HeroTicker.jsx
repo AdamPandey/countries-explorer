@@ -1,10 +1,8 @@
-// src/custom-components/HeroTicker.jsx
-
 import { useEffect, useState } from "react";
-import axios from "axios"; // <-- IMPORT AXIOS
+import axios from "axios"; 
 import { TickerColumn } from "./TickerColumn";
 
-// We now get the key from Vite's environment variables
+
 // const PEXELS_API_KEY = "Tcy9zXQsZOm9PmHdoGzuQwE1N7iqhjL6QL1Z0czthoP6Qjg3ERhLBFX2";
 
 const shuffleArray = (array) => array.sort(() => 0.5 - Math.random());

@@ -1,12 +1,9 @@
-// src/custom-components/globe/Country.jsx
-
 import { useState, useMemo, useCallback } from 'react';
 import * as THREE from 'three';
 import earcut from 'earcut';
 
-// Helper functions (no changes needed)
+// Helper functions
 function latLonToVector3(lat, lon, radius) {
-  // ...
   const phi = (90 - lat) * (Math.PI / 180);
   const theta = (lon + 180) * (Math.PI / 180);
   const x = -(radius * Math.sin(phi) * Math.cos(theta));
@@ -82,11 +79,11 @@ export function Country({ geo, onHoverChange, onCountryClick, theme, isActive })
 
   if (!geometry) return null;
 
-  // Define colors
+  
   const fillColor = theme === 'dark' ? '#374151' : '#e5e7eb';
   const strokeColor = theme === 'dark' ? '#f3f4f6' : '#1f2937';
   const hoverColor = theme === 'dark' ? '#0ea5e9' : '#0284c7';
-  const activeColor = theme === 'dark' ? '#f59e0b' : '#f97316'; // A vibrant amber/orange for active state
+  const activeColor = theme === 'dark' ? '#f59e0b' : '#f97316'; 
 
   // Determine the final color based on state priority: Active > Hover > Default
   const finalColor = isActive ? activeColor : (isHovered ? hoverColor : fillColor);
@@ -101,7 +98,7 @@ export function Country({ geo, onHoverChange, onCountryClick, theme, isActive })
         onPointerUp={handlePointerUp}
       >
         <meshBasicMaterial
-          color={finalColor} // Use the calculated final color
+          color={finalColor} 
           side={THREE.DoubleSide}
         />
       </mesh>

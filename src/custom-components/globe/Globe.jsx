@@ -1,5 +1,3 @@
-// src/custom-components/globe/Globe.jsx
-
 import { Suspense, useEffect, useState, useRef, useCallback } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
@@ -19,7 +17,7 @@ function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, th
 
   useEffect(() => {
     if (groupRef.current) {
-      groupRef.current.rotation.y = -1.57; // Start focused on the Americas
+      groupRef.current.rotation.y = -1.57;
     }
   }, []);
 
@@ -27,29 +25,25 @@ function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, th
     const controls = controlsRef.current;
     if (!controls) return;
 
-    // =================================================================
-    // THE DEFINITIVE CAMERA FIX
-    // =================================================================
     let worldTargetPosition;
     let worldIdealPosition;
 
     if (target) {
-      // 1. Get the local center of the clicked country from the `target` prop.
+      
       const localCenter = target.center;
       
-      // 2. Convert this local point to its actual position in the global 3D space.
-      // This is crucial because it accounts for the globe's current rotation.
+      
       worldTargetPosition = groupRef.current.localToWorld(localCenter.clone());
 
-      // 3. Calculate the camera's ideal position based on this correct WORLD target.
+      
       worldIdealPosition = worldTargetPosition.clone().normalize().multiplyScalar(1.8);
     } else {
-      // If no target, aim for the center of the world and the default camera position.
+      
       worldTargetPosition = new THREE.Vector3(0, 0, 0);
       worldIdealPosition = new THREE.Vector3(0, 0, 2.5);
     }
     
-    // Animate camera and controls towards the calculated world positions
+    
     const distanceToTarget = state.camera.position.distanceTo(worldIdealPosition);
     if (distanceToTarget < 0.01) {
       state.camera.position.copy(worldIdealPosition);
@@ -61,7 +55,7 @@ function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, th
 
     controls.update();
     
-    // Auto-rotation logic
+    
     if (groupRef.current && !isUserInteracting && !target) {
       groupRef.current.rotation.y += delta * 0.1;
     }
@@ -114,7 +108,7 @@ function Scene({ geoData, onHoverChange, onCountryClick, target, controlsRef, th
   );
 }
 
-// The Globe component below does not need any changes.
+
 export function Globe({ countries }) {
   const [geoData, setGeoData] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(null);

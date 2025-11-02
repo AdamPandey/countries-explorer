@@ -1,8 +1,6 @@
-// src/custom-components/globe/InfoCard.jsx
-
 import { motion } from 'framer-motion';
 
-// Animation variants for the card to slide in from the right
+
 const cardVariants = {
   hidden: { opacity: 0, x: '100%' },
   visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 30 } },
@@ -10,7 +8,7 @@ const cardVariants = {
 };
 
 export function InfoCard({ country, onNavigate, onClose, theme }) {
-  // Theme-aware styling
+  
   const isDarkMode = theme === 'dark';
   const cardStyles = {
     width: '300px',
@@ -26,7 +24,7 @@ export function InfoCard({ country, onNavigate, onClose, theme }) {
   const secondaryTextStyle = { color: isDarkMode ? '#a1a1aa' : '#71717a' };
 
   return (
-    // This is a normal motion.div positioned absolutely within its parent
+    
     <motion.div
       className="absolute top-4 right-4 z-10"
       variants={cardVariants}

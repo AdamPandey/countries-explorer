@@ -1,5 +1,3 @@
-// src/custom-components/Logo.jsx
-
 export function Logo({ className }) {
   return (
     <svg
@@ -8,7 +6,7 @@ export function Logo({ className }) {
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       stroke="currentColor"
-      strokeWidth="5" // Slightly thicker for a stronger presence
+      strokeWidth="5" 
       strokeLinecap="round"
       strokeLinejoin="round"
     >
