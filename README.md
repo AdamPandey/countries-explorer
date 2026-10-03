@@ -1,107 +1,87 @@
 # Meridian
 
-### An Interactive 3D Globe for Exploring World Data
+A country explorer built around a 3D globe. On desktop you spin the globe, click a country, and open a detail page with facts, news, popular movies and an exchange rate. Underneath the globe is a searchable grid of every country. Phones get the same grid and a photo ticker, without the globe.
 
-#### GitHub Repo
-https://github.com/AdamPandey/countries-explorer.git
+Repo: https://github.com/AdamPandey/countries-explorer
 
+## Stack
 
+- React 19 and Vite 7, plain JavaScript (JSX), React Router 7
+- three.js through React Three Fiber and drei for the globe
+- `world-atlas` (110m country outlines) with `topojson-client`, and `earcut` to triangulate the polygons
+- Tailwind CSS 3 (PostCSS) and shadcn/ui components (Radix), Framer Motion for animation, `next-themes` is listed but the theme switch is a custom `ThemeProvider`
+- Axios for requests
+- Cloudflare Pages Functions in `functions/` as small API proxies
 
----
+External APIs: REST Countries, TMDB, GNews, ExchangeRate-API, Pexels.
 
-## Project Description
+## Features
 
-**Meridian** is a modern, immersive web application that reimagines how we explore data about countries around the world. Built with React and Vite, this project moves beyond traditional lists and grids by presenting a fully interactive 3D globe as its centerpiece. Users can navigate the globe, click on countries to receive detailed information, and experience a rich, multi-API data environment that provides insights into geography, culture, and current events.
+- Home page loads all countries once from REST Countries and shows them as cards (name, region, capital, population, flag) with skeleton cards while loading.
+- Search in the navbar filters the grid by country name as you type. While a search is active the globe and photo ticker are hidden.
+- Globe (screens 768px and wider): drag to rotate, scroll to zoom, it auto-rotates until you touch it. Hovering highlights a country, clicking one flies the camera to it and opens an info card with the flag, capital and population. "Show Details" goes to the detail page. Antarctica is ignored.
+- Photo ticker: five columns of Pexels photos scrolling in opposite directions, one photo per random country, pausing on hover.
+- Detail page at `/country/:countryCode` (the three-letter code): flag, official name, population, region, sub region, capital, currencies, languages, border country links, the current rate of the country's first currency against USD, up to 4 recent news articles and up to 8 popular movies from that country. News, movies and rate are fetched in parallel and each is optional, so one failing API does not blank the page.
+- Dark and light theme, dark by default, saved in `localStorage` under `vite-ui-theme`.
+- Navbar title moves from center to left on scroll, and the search icon expands into an input.
 
----
+## Getting started
 
-## Key Features
+```bash
+git clone https://github.com/AdamPandey/countries-explorer.git
+cd countries-explorer
+npm install
+npm run dev
+```
 
-This project incorporates a wide range of modern front-end features:
+Vite serves on http://localhost:5173. Other scripts: `npm run build`, `npm run preview`, `npm run lint`. There are no tests.
 
--   **Interactive 3D Globe:**
-    -   Built with **React Three Fiber** and **Three.js**.
-    -   Users can click, drag, and zoom to explore the globe.
-    -   Clicking a country smoothly animates the camera to focus on it.
-    -   Features a minimalist, theme-aware design with country outlines.
-    -   **3D Info Card:** A beautiful, semi-transparent info card appears in 3D space next to a selected country, showing key data without leaving the immersive view.
+No environment variables are read anywhere in the code. Keys are written directly into source files (see below).
 
--   **Immersive Hero Section:**
-    -   **Multi-column Animated Ticker:** A captivating, auto-scrolling hero section displays travel photos from around the world using the **Pexels API**.
-    -   Features five counter-scrolling columns for a dynamic effect.
-    -   Animation intelligently slows down on hover.
+`npm run dev` only runs Vite. The two proxy functions are not served by it, so locally the news section stays empty and the photo ticker does not appear. To run them you need Cloudflare's Pages runtime (for example `wrangler pages dev`), which is not a dependency of this project.
 
--   **Responsive & Dynamic UI:**
-    -   **Conditional Layout:** The application serves the full 3D Globe experience on desktop, while providing a performant and beautiful Hero Ticker and grid view on mobile.
-    -   **Animated Search:** When a user searches, the hero elements gracefully fade away to focus on the search results.
-    -   **Dynamic Navbar:** A highly polished navbar with a title that animates from the center to the side on scroll, and a search icon that elegantly expands into a functional search bar.
+## Project structure
 
--   **Rich Data Integration (Multi-API):**
-    -   **REST Countries API:** The core source for all geographical and demographic data.
-    -   **The Movie Database (TMDB):** Fetches a list of popular movies originating from the selected country.
-    -   **GNews API:** Displays the latest news headlines related to the selected country.
-    -   **ExchangeRate-API:** Provides live currency exchange rates against the USD.
-    -   **Pexels API:** Powers the immersive hero ticker with beautiful travel photography.
+```
+src/
+  main.jsx                  router (/ and /country/:countryCode), theme provider
+  App.jsx                   home page: fetch countries, search, globe, ticker, grid
+  routes/CountryDetail.jsx  detail page and its API calls
+  routes/Root.jsx           layout wrapper
+  custom-components/        Navbar, CountryCard, skeleton, HeroTicker, TickerColumn, ScrollPrompt, ModeToggle, Logo
+  custom-components/globe/  Globe (canvas, camera, selection), Country (one mesh per country), InfoCard
+  components/ui/            shadcn/ui primitives, theme-provider
+  hooks/useMediaQuery.js
+functions/
+  gnews.js                  GET /gnews?q=&lang=&max=
+  pexels.js                 GET /pexels?query=
+```
 
--   **Modern Styling & Animations:**
-    -   Styled with **Tailwind CSS** and **ShadCN/UI** for a clean, professional, and consistent component-based design.
-    -   **Dark/Light Mode:** A beautiful theme toggle allows users to switch between modes.
-    -   **Fluid Animations:** Built with **Framer Motion** for smooth page transitions, scroll-triggered card animations, and a polished user experience.
-    -   **Professional Loading State:** Uses skeleton loaders to prevent layout shifts and improve perceived performance.
+Alias `@` points to `src`.
 
----
+## How it works
 
-## Tech Stack
+Home: `App.jsx` calls `https://restcountries.com/v3.1/all` with a `fields` filter (name, capital, population, flags, region, cca3, cca2). That one array feeds the grid, the globe and the ticker.
 
--   **Frontend:** React, Vite
--   **3D Graphics:** React Three Fiber, Three.js, React Three Drei
--   **Styling:** Tailwind CSS, ShadCN/UI
--   **Animations:** Framer Motion
--   **Data Fetching:** Axios
--   **Geography & Geometry:** `world-atlas`, `topojson-client`, `three-geojson-geometry`, `earcut`
--   **APIs Used:** REST Countries, TMDB, GNews, ExchangeRate-API, Pexels
+Globe: `Globe.jsx` turns the `world-atlas` TopoJSON into GeoJSON features. `Country.jsx` projects each polygon onto a sphere, triangulates it with `earcut` and renders it as a mesh with an outline. The atlas has no codes that match REST Countries, so a click is matched to a country by name (`name.common` or `name.official`). The camera moves toward the clicked country each frame until it reaches the target.
 
----
+Detail: `CountryDetail.jsx` fetches `restcountries.com/v3.1/alpha/{code}`, then calls TMDB (`discover/movie` filtered by origin country, sorted by popularity), the `/gnews` function, and ExchangeRate-API with `Promise.allSettled`.
 
-## Getting Started
+Proxies: browsers could not call GNews and Pexels directly (the git history mentions a CORS error), so `functions/gnews.js` and `functions/pexels.js` forward the request server-side and return the JSON with an open CORS header. They use the `onRequest(context)` signature of Cloudflare Pages Functions, and the commit history mentions deploying to Cloudflare Pages. The repo has no deploy config (no `wrangler.toml`, no `_redirects`), and no live URL is recorded anywhere in it.
 
-To run this project locally, follow these steps:
+## API keys
 
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/AdamPandey/countries-explorer.git]
-    cd meridian-project
-    ```
+All four keys are committed in plain text: GNews and Pexels in `functions/`, TMDB and ExchangeRate-API in `src/routes/CountryDetail.jsx`. Earlier GNews keys are in the git history, and `HeroTicker.jsx` has an old Pexels key in a comment. The TMDB and ExchangeRate keys are shipped to every visitor's browser. If you fork this, use your own keys, and the existing ones should be revoked and replaced with environment variables or Cloudflare secrets. The commit log already shows two keys getting "burnt".
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+## Known gaps
 
-3.  **Run the development server:**
-    ```bash
-    npm run dev
-    ```
-    The application will be available at `http://localhost:5173`.
+- The photo ticker makes 25 Pexels requests on every home page load and renders only if all 25 return a photo.
+- The detail page assumes every country has currencies and languages. A territory without them (Antarctica, for example) fails with "Could not load data for this country."
+- Border countries show as three-letter codes, not names.
+- Search matches the common name only. There is no region filter or sorting.
+- The globe only recognises countries whose name matches between the two datasets, so some will not respond to clicks.
+- On mobile there is no globe, by design.
+- Unused leftovers: `InfoCard3D.jsx` (the info card was moved from 3D to an HTML overlay), `CountryGrid.jsx`, `src/App.css`, and the `@react-spring/three` dependency that only `InfoCard3D` uses. The `tailwind:init` script is also unused.
+- The `functions/` proxies have no error handling, and the Pexels one fetches the first result only.
 
----
-
-## Development Highlights & Challenges
-
-This project involved overcoming several significant technical challenges, which were crucial to its development:
-
--   **The 3D Globe Debugging Saga:** The implementation of the interactive globe was the most challenging and rewarding part of this project.
-    -   **Problem:** Early versions of the globe would crash the renderer due to malformed or incomplete geographical data from the `world-atlas` package.
-    -   **Solution:** After extensive debugging, the final solution involved using the `earcut` library to manually triangulate the GeoJSON data into a robust `BufferGeometry` that the 3D engine could reliably render. This solved all rendering crashes and visual artifacts.
-    -   **Problem:** A deep and complex series of bugs prevented click and hover events from working correctly, due to conflicts between the `OrbitControls` and React Three Fiber's event system.
-    -   **Solution:** The final architecture uses a self-contained event system within each `Country` component. This elegant solution separates concerns, eliminates conflicts, and provides a robust, professional-grade user interaction model.
-
--   **UI/UX Refinement:** The project underwent a significant iterative design process. What started as a simple grid evolved into a polished experience with a dynamic navbar, an immersive hero section, and fluid animations, all aimed at exceeding the user's expectations.
-
--   **Data Integration & Mismatch:** A critical bug where clicks failed was traced back to a fundamental data mismatch between the geographical data (`world-atlas`) and the API data (`restcountries.com`). The solution was to switch from matching by numeric IDs (which didn't exist in both datasets) to matching by the country's **name**, which created a reliable bridge between the two data sources.
-
----
-
-## 🙏 Acknowledgements & References
-
--- @MohammedChe for the collab
+Thanks to @MohammedChe for collaborating on the project.
